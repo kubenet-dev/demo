@@ -1,0 +1,61 @@
+apiVersion: config.sdcio.dev/v1alpha1
+kind: Config
+metadata:
+  creationTimestamp: null
+  labels:
+    config.sdcio.dev/targetName: edge02
+    config.sdcio.dev/targetNamespace: default
+  name: topo3nodesrl.vpc100.edge02
+  namespace: default
+spec:
+  config:
+  - path: /
+    value:
+      interface:
+      - admin-state: enable
+        description: k8s-ethernet-1/1
+        ethernet: {}
+        name: ethernet-1/1
+        subinterface:
+        - admin-state: enable
+          description: k8s-customer
+          index: 100
+          type: bridged
+          vlan:
+            encap:
+              single-tagged:
+                vlan-id: 100
+        vlan-tagging: true
+      network-instance:
+      - admin-state: enable
+        description: k8s-vpc100.br100
+        interface:
+        - name: ethernet-1/1.100
+        name: vpc100.br100
+        protocols:
+          bgp-evpn:
+            bgp-instance:
+            - admin-state: enable
+              encapsulation-type: vxlan
+              evi: 100
+              id: 1
+              vxlan-interface: vxlan0.100
+          bgp-vpn:
+            bgp-instance:
+            - id: 1
+              route-target:
+                export-rt: target:65535:100
+                import-rt: target:65535:100
+        type: mac-vrf
+        vxlan-interface:
+        - name: vxlan0.100
+      tunnel-interface:
+      - name: vxlan0
+        vxlan-interface:
+        - index: 100
+          ingress:
+            vni: 100
+          type: bridged
+  lifecycle: {}
+  priority: 10
+status: {}
